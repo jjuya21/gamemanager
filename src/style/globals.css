@@ -1,0 +1,79 @@
+.App {
+  text-align: center;
+}
+
+.login-button {
+  margin-left: auto;
+  display: inline-block;
+  padding-right: 20px;
+}
+
+.App-header {
+  top: 0px;
+  line-height: 75px;
+  background-color: #282c34;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(15px + 2vmin);
+  color: white;
+  border-bottom: 5px solid #39445a;
+  white-space: nowrap;
+}
+
+.sidebar {
+  height: 100vh;
+  width: 200px;
+  background-color: #282c34;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 15px;
+  align-items: flex-start;
+  border-right: 5px solid #39445a;
+}
+
+.sidebar a {
+  padding: 10px;
+  list-style: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  text-decoration: none; /* 링크 밑줄 제거 */
+  color: white;
+  padding-left: 20px; /* 좌측 간격 추가 */
+}
+.sidebar Link {
+  padding: 10px;
+  list-style: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  text-decoration: none; /* 링크 밑줄 제거 */
+  color: white;
+  padding-left: 20px; /* 좌측 간격 추가 */
+}
+
+.section-content {
+  flex-grow: 1; /* 나머지 영역을 채우기 위해 flex-grow 속성 추가 */
+  display: flex;
+  background-color: #282c34;
+  color: white;
+  padding-right: 70px;
+}
+
+.main-content {
+  flex-grow: 1; /* 나머지 영역을 채우기 위해 flex-grow 속성 추가 */
+  padding: 20px; /* 내용과 경계선 간격을 조절하기 위해 패딩 추가 */
+}
+
+td {
+  width:100px
+}
+h2 {
+  text-align: center;
+}
+
+td, h2, th, table, p, div, a {
+  white-space: nowrap;
+}
