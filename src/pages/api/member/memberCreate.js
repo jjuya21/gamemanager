@@ -36,7 +36,7 @@ const createmembers = async (req, res) => {
 				});
 			});
 		}
-		res.json({ type: "계정생성" });
+		res.json({ type:"member", action:"님이 계정을 만들었습니다." });
 	} catch (error) {
 		console.error(error);
 		// 에러를 적절히 처리하세요 (응답 보내거나 재전파)

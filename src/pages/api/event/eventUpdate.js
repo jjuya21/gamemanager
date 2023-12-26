@@ -23,7 +23,7 @@ const updateEvents = async (req, res) => {
 				resolve(results);
 			});
 		});
-		res.json({ type:"event" });
+		res.json({ type:"event", action:`님이 ${title} 이벤트의 내용을 변경했습니다.` });
 	} catch (error) {
 		console.error(error);
 		// 에러를 적절히 처리하세요 (응답 보내거나 재전파)

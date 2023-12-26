@@ -21,6 +21,12 @@ export default function Home() {
         if (res.data.error === "wrong"){
           alert("ID 또는 PASSWORD가 틀렸습니다");
         } else {
+          Axios.post('http://localhost:8000/logCreate', { 
+            withCredentials: true ,
+            token:res.data.token,
+            type:res.data.type,
+            action:res.data.action
+          });
           localStorage.setItem('token', res.data.token);
           router.replace('/members');
         }
@@ -50,6 +56,13 @@ export default function Home() {
         });
         if (res.data.error==='dip'){
           alert("이미 존재하는ID입니다.");
+        } else {
+          Axios.post('http://localhost:8000/logCreate', { 
+            withCredentials: true ,
+            memberID:memberID,
+            type:res.data.type,
+            action:res.data.action
+          });
         }
         
       } catch (error) {
@@ -88,7 +101,7 @@ export default function Home() {
             <tr><td>ID</td><td><input name="memberID" type="text" style={{textAlign:"right"}}></input></td></tr>
             <tr><td>PASS</td><td><input name="password" type="password" style={{textAlign:"right"}}></input></td></tr>
             <tr><td>이름</td><td><input name="name" type="text" style={{textAlign:"right"}}></input></td></tr>
-            <tr><td>Phone</td><td><input name="phone" type="text" style={{textAlign:"right"}}></input></td></tr>
+            <tr><td>Phone</td><td><input name="phone" maxLength={11} placeholder="- 없이 번호만" type="text" style={{textAlign:"right"}}></input></td></tr>
           </tbody>
         </table>
         <h2><button type="submit">회원가입</button></h2>

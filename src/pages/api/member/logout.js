@@ -11,7 +11,7 @@ const logout = async (req, res) => {
     
     // 비동기적으로 데이터베이스에서 조회 작업 수행
     db.query(queryString, [memberID]);
-    res.json({ type:"logout" });
+    res.json({ type:"logout", action:"님이 로그아웃했습니다." });
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal Server Error', error);

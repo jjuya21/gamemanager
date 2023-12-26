@@ -108,10 +108,16 @@ function Nav(props) {
                 const res = await Axios.delete('http://localhost:3000/api/event/eventDelete', {
                     data: { checkedIds },
                 });
-                Axios.post('http://localhost:3000/api/log/logCreate', {
-                    type: res.data.type,
-                    token: props.token
-                });
+                if (res){
+                    for (let i = 0; i < res.data.deletedevent.length; i++) {
+                      Axios.post('http://localhost:8000/logCreate', { 
+                          withCredentials: true ,
+                          token:props.token,
+                          type:res.data.type,
+                          action:`님이 ${res.data.deletedevent[i]} 이벤트를 삭제했습니다.`
+                        });
+                    }
+                  }
                 window.location.reload();
             } catch (error) {
                 console.error('An error occurred during the request:', error);
@@ -347,7 +353,15 @@ function Create(props) {
                     reward:reward,
                     count:count,
                 });
-                if(res.data.success) {
+                if (res.data.error==='dip'){
+                    alert("이미 존재하는ID입니다.");
+                } else {
+                    Axios.post('http://localhost:8000/logCreate', { 
+                        withCredentials: true ,
+                        token:props.token,
+                        type:res.data.type,
+                        action:res.data.action
+                    });
                     props.onCreate();
                 }
             } else {
@@ -514,7 +528,6 @@ function Create(props) {
 }
 
 function Update(props) {
-    const [title, setTitle] = useState(props.title);
     const [s_time, sets_time] = useState(props.s_time);
     const [e_time, sete_time] = useState(props.e_time);
     const [reward, setReward] = useState([...props.reward]);
@@ -626,7 +639,7 @@ function Update(props) {
             .map((elem) => parseFloat(elem.value));
 
             const id = props.id;
-            const title = event.target.title.value;
+            const title = props.title;
             const s_time = event.target.s_time.value;
             const e_time = event.target.e_time.value;
             const reward = updatedReward;
@@ -634,7 +647,7 @@ function Update(props) {
             const point = updatedPoint;
 
             // 서버로 데이터 전송
-            if (title && s_time && e_time) {
+            if (s_time && e_time) {
                 const res = await Axios.put('http://localhost:3000/api/event/eventUpdate', {
                     id:id,
                     title:title,
@@ -644,7 +657,13 @@ function Update(props) {
                     count:count,
                     point:point,
                 });
-                if(res.data.success) {
+                if(res) {
+                    Axios.post('http://localhost:8000/logCreate', { 
+                        withCredentials: true ,
+                        token:props.token,
+                        type:res.data.type,
+                        action:res.data.action
+                    });
                     props.onUpdate();
                 }
             } else {
@@ -668,9 +687,7 @@ function Update(props) {
                     </thead>
                     <tbody>
                         <tr>
-                            <td><input type="text" name="title" placeholder="title" value={title} onChange={event => {
-                            setTitle(event.target.value);
-                            }} /></td>
+                            <td>{props.title}</td>
                             <td><input type="text" name="s_time" placeholder="s_time" value={s_time} onChange={event => {
                             sets_time(event.target.value);
                             }}></input></td>
@@ -744,6 +761,7 @@ function Update(props) {
 }
 
 export default function Event() {
+    const [token,setToken] = useState(null);
     const [mode, setMode] = useState('DEFAULT');
     const [id, setId] = useState(null);
     const [tier, setTier] = useState(null);
@@ -760,7 +778,6 @@ export default function Event() {
     let attend_count = 0;
     let pass_count = 0;
 
-    const [token,setToken] = useState(null);
     useEffect(() => {
         setToken(localStorage.getItem('token'));
         const fetchData = async () => {
@@ -868,7 +885,6 @@ export default function Event() {
         point = point_topics.point;
         content = <Update id={id} title={title} s_time={s_time} e_time={e_time} reward={reward} count={count} type={type} point={point} token={token}
         onUpdate={() => {
-            handleReloadData();
             setMode('READ');
         }}></Update>
     }
@@ -903,10 +919,16 @@ export default function Event() {
 
     const handelLogout = async () => {
         try {
-          const token = localStorage.getItem('token');
-          const res = await Axios.delete('http://localhost:3000/api/member/logout', {
-            token: { token },
+          const res = await Axios.post('http://localhost:3000/api/member/logout', {
+            token:token,
           });
+          Axios.post('http://localhost:8000/logCreate', { 
+            withCredentials: true ,
+            token:token,
+            type:res.data.type,
+            action:res.data.action
+          });
+          localStorage.setItem('token', null);
         } catch (error) {
             console.error('An error occurred during the request:', error);
         }

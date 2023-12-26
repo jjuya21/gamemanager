@@ -5,7 +5,6 @@ import Link from "next/link";
 import Axios from 'axios';
 
 function Nav(props) {
-  const [eventType, setEventType] = React.useState("attend");
   const [checkedIds, setCheckedIds] = useState([]);
   const tds = [];
   const handleCheckboxChange = (id) => {
@@ -18,12 +17,21 @@ function Nav(props) {
     }
   };
 
-  const handleUpdateTier = async (id, tier) => {
+  const handleUpdateTier = async (memberID, tier) => {
     try {
       const res = await Axios.put('http://localhost:3000/api/member/tierUpdate', {
-        id: id,
+        memberID: memberID,
         tier: tier,
+        token: props.token
       });
+      if (res){
+        Axios.post('http://localhost:8000/logCreate', { 
+            withCredentials: true ,
+            token:props.token,
+            type:res.data.type,
+            action:res.data.action
+          });
+      }
       window.location.reload();
     } catch (error) {
       console.error('An error occurred during the request:', error);
@@ -35,8 +43,17 @@ function Nav(props) {
         const res = await Axios.delete('http://localhost:3000/api/member/memberDelete', {
           data: { checkedIds },
         });
+        if (res){
+          for (let i = 0; i < res.data.deletedID.length; i++) {
+            Axios.post('http://localhost:8000/logCreate', { 
+                withCredentials: true ,
+                token:props.token,
+                type:res.data.type,
+                action:`님이 ${res.data.deletedID[i]}님의 계정을 삭제했습니다.`
+              });
+          }
+        }
         window.location.reload();
-        
       } catch (error) {
         console.error('An error occurred during the request:', error);
       }
@@ -62,7 +79,7 @@ function Nav(props) {
             <select
             name="tier"
             value={t.tier}
-            onChange={(event) => handleUpdateTier(t.id, event.target.value)}
+            onChange={(event) => handleUpdateTier(t.memberID, event.target.value)}
             >
               <option value="High">High</option>
               <option value="Low">Low</option>
@@ -149,6 +166,12 @@ export default function Members() {
         const res = await Axios.post('http://localhost:3000/api/member/logout', {
           token:token,
         });
+        Axios.post('http://localhost:8000/logCreate', { 
+            withCredentials: true ,
+            token:token,
+            type:res.data.type,
+            action:res.data.action
+          });
         localStorage.setItem('token', null);
       } catch (error) {
           console.error('An error occurred during the request:', error);
@@ -156,7 +179,7 @@ export default function Members() {
   };
   
   if(topics){
-    main = <Nav topics={topics} tier={tier}></Nav>
+    main = <Nav topics={topics} tier={tier} token={token}></Nav>
   } else {
     main = <h2>계정이 존재하지 않습니다.</h2>
   }

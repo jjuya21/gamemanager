@@ -22,7 +22,7 @@ const getUsers = async (req, res) => {
 			topics.push({ id: events[i].id, type: events[i].type, title: events[i].title, s_time: events[i].s_time, e_time: events[i].e_time, reward: JSON.parse(events[i].reward), count: JSON.parse(events[i].count), point: JSON.parse(events[0].point) })
 		}
 		// 'GET' 요청에 대한 응답
-		res.json({events:topics, type:"event"});
+		res.json({events:topics});
 		
 	} catch (error) {
 		console.error(error);

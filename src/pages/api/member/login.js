@@ -29,7 +29,7 @@ const login = async (req, res) => {
           queryString = "UPDATE member_table SET lastlogin = now() WHERE memberID = ?";
           db.query(queryString, [memberID]);
 
-          res.json({ token:token, type:"member" });
+          res.json({ token:token, type:"login", action:"님이 로그인했습니다." });
         } else {
           res.json({ error: "wrong" });
         }

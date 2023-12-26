@@ -18,7 +18,7 @@ const getmembers = async (req, res) => {
 			});
 		});
 		// 'GET' 요청에 대한 응답
-		res.json({ members: members, type:"member" });
+		res.json({ members: members });
 		// 연결 종료
 		
 	} catch (error) {
