@@ -1,6 +1,6 @@
 "use client";
 import Axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 
 
@@ -28,7 +28,7 @@ export default function Home() {
             action:res.data.action
           });
           localStorage.setItem('token', res.data.token);
-          router.replace('/members');
+          router.replace('/member');
         }
       } catch (error) {
         console.error('An error occurred during the request:', error);
@@ -101,7 +101,7 @@ export default function Home() {
             <tr><td>ID</td><td><input name="memberID" type="text" style={{textAlign:"right"}}></input></td></tr>
             <tr><td>PASS</td><td><input name="password" type="password" style={{textAlign:"right"}}></input></td></tr>
             <tr><td>이름</td><td><input name="name" type="text" style={{textAlign:"right"}}></input></td></tr>
-            <tr><td>Phone</td><td><input name="phone" maxLength={11} placeholder="- 없이 번호만" type="text" style={{textAlign:"right"}}></input></td></tr>
+            <tr><td>Phone</td><td><input name="phone" maxLength={11} type="text" style={{textAlign:"right"}}></input></td></tr>
           </tbody>
         </table>
         <h2><button type="submit">회원가입</button></h2>

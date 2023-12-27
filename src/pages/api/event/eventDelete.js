@@ -9,14 +9,14 @@ const deleteUsers = async (req, res) => {
       let queryString = "SELECT title FROM event_table WHERE id = " + id;
 
       // 비동기적으로 데이터베이스에서 삭제 작업 수행
-      const result = await new Promise((resolve, reject) => {
+      await new Promise((resolve, reject) => {
         db.query(queryString, (error, results) => {
           if (error) {
             reject(error);
             return;
           }
           resolve(results);
-          deletedevent.push(results[0].memberID);
+          deletedevent.push(results[0].title);
         });
       });
       queryString = "DELETE FROM event_table WHERE id = " + id;

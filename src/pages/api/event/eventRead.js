@@ -4,7 +4,7 @@ const getUsers = async (req, res) => {
 	
 	try {
 		// 데이터베이스 연결
-		const queryString = "SELECT id, type, title, DATE_FORMAT(s_time, '%Y.%m.%d %H:%i') as s_time, DATE_FORMAT(e_time, '%Y.%m.%d %H:%i') as e_time, reward, count, point FROM event_table";
+		const queryString = "SELECT id, type, title, DATE_FORMAT(s_time, '%Y.%m.%d %H:%i') as s_time, DATE_FORMAT(e_time, '%Y.%m.%d %H:%i') as e_time, reward, count FROM event_table";
 
 		// 'GET' 요청일 때 추가 작업 수행
 		const events = await new Promise((resolve, reject) => {
@@ -19,7 +19,7 @@ const getUsers = async (req, res) => {
 		});
 		const topics = [];
 		for (let i = 0; events.length > i; i++){
-			topics.push({ id: events[i].id, type: events[i].type, title: events[i].title, s_time: events[i].s_time, e_time: events[i].e_time, reward: JSON.parse(events[i].reward), count: JSON.parse(events[i].count), point: JSON.parse(events[0].point) })
+			topics.push({ id: events[i].id, type: events[i].type, title: events[i].title, s_time: events[i].s_time, e_time: events[i].e_time, reward: JSON.parse(events[i].reward), count: JSON.parse(events[i].count) })
 		}
 		// 'GET' 요청에 대한 응답
 		res.json({events:topics});

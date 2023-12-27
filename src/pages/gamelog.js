@@ -78,7 +78,7 @@ function Nav(props) {
     );
   }
 
-export default function Log() {
+export default function GameLog() {
   const router = useRouter();
     const [token,setToken] = useState(null);
     let contextControl = null;

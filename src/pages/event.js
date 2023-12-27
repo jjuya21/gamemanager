@@ -2,6 +2,7 @@ import "C:/Users/gc_de/next/my-app/src/style/globals.css";
 import React, { useEffect, useState } from 'react';
 import Link from "next/link";
 import Axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 function Nav(props) {
     const [checkedIds, setCheckedIds] = useState([]);
@@ -313,10 +314,10 @@ function Article(props) {
     );
 }
 
-
 function Create(props) {
     const [eventType, setEventType] = React.useState("attend"); // Default event type is "attend"
     const point_ths = [];
+    console.log(props)
     for (let i = 0; i < props.point.length; i++) {
         point_ths.push(<th>{props.point[i]}</th>)
     }
@@ -354,7 +355,7 @@ function Create(props) {
                     count:count,
                 });
                 if (res.data.error==='dip'){
-                    alert("이미 존재하는ID입니다.");
+                    alert("이미 존재하는 이벤트명입니다.");
                 } else {
                     Axios.post('http://localhost:8000/logCreate', { 
                         withCredentials: true ,
@@ -374,13 +375,23 @@ function Create(props) {
 
     const currentDate = new Date();
 
-    const year = currentDate.getFullYear();
-    const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 1을 더하고 두 자리로 패딩
-    const day = String(currentDate.getDate()).padStart(2, '0');
-    const hours = String(currentDate.getHours()).padStart(2, '0');
-    const minutes = String(currentDate.getMinutes()).padStart(2, '0');
+    let year = currentDate.getFullYear();
+    let month = String(currentDate.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 1을 더하고 두 자리로 패딩
+    let day = String(currentDate.getDate()).padStart(2, '0');
+    let hours = String(currentDate.getHours()).padStart(2, '0');
+    let minutes = String(currentDate.getMinutes()).padStart(2, '0');
 
     const formattedStartDateTime = `${year}-${month}-${day} ${hours}:${minutes}`;
+
+    const nextWeekDate = new Date(currentDate);
+    nextWeekDate.setDate(currentDate.getDate() + 7);
+
+    // nextWeekDate를 이용하여 각 부분을 추출
+    year = nextWeekDate.getFullYear();
+    month = String(nextWeekDate.getMonth() + 1).padStart(2, '0');
+    day = String(nextWeekDate.getDate()).padStart(2, '0');
+    hours = String(nextWeekDate.getHours()).padStart(2, '0');
+    minutes = String(nextWeekDate.getMinutes()).padStart(2, '0');
     const formattedEndDateTime = `${year}-${month}-${day} ${hours}:${minutes}`;
 
     return <article>
@@ -761,13 +772,14 @@ function Update(props) {
 }
 
 export default function Event() {
+    const router = useRouter();
     const [token,setToken] = useState(null);
     const [mode, setMode] = useState('DEFAULT');
     const [id, setId] = useState(null);
     const [tier, setTier] = useState(null);
     const [topics,setTopics] = useState([
     ]);
-    const [point_topics, setPoint_topics] = useState({ point: [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500] });
+    const [points, setPoints] = useState({ point: [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500] });
 
     let content = null;
     let contextControl = null;
@@ -778,14 +790,36 @@ export default function Event() {
     let attend_count = 0;
     let pass_count = 0;
 
+    const handelLogout = async () => {
+        try {
+          const res = await Axios.post('http://localhost:3000/api/member/logout', {
+            token:token,
+          });
+          Axios.post('http://localhost:8000/logCreate', { 
+            withCredentials: true ,
+            token:token,
+            type:res.data.type,
+            action:res.data.action
+          });
+          localStorage.setItem('token', null);
+        } catch (error) {
+            router.replace('/');
+        }
+    };
+
+
     useEffect(() => {
         setToken(localStorage.getItem('token'));
         const fetchData = async () => {
             try {
-                const res = await Axios.get('http://localhost:3000/api/event/eventRead');
+                let res = await Axios.get('http://localhost:3000/api/event/eventRead');
                 setTopics(res.data.events);
+                res = await Axios.get('http://localhost:3000/api/event/pointRead');
+                setPoints(res.data.point);
             } catch (error) {
-                console.error('An error occurred during the request:', error);
+                handelLogout();
+                alert("토큰의 유효시간이 지났습니다.")
+                router.replace('/');
             }
             };
         const handleDashboard = async () => {
@@ -797,7 +831,9 @@ export default function Event() {
                     });
                     setTier(res.data.tier);
                 } catch (error) {
-                    console.error('An error occurred during the request:', error);
+                    handelLogout();
+                    router.replace('/');
+                    alert("토큰의 유효시간이 지났습니다.")
                 }
             }
         };
@@ -833,7 +869,7 @@ export default function Event() {
                 break;
             }
         }
-        point = point_topics.point;
+        point = points;
         content = <Article title={title} s_time={s_time} e_time={e_time} reward={reward} count={count} type={type} point={point}></Article>
         if (tier === "Viewer") {
             contextControl = <>
@@ -857,12 +893,13 @@ export default function Event() {
     }
     else if (mode === 'CREATE') {
         let point = null;
-        point = point_topics.point;
+        point = points;
         content = <Create point={point} token={token}
         onCancel={() => {
             setMode('DEFAULT');
         }}
         onCreate={() => {
+            console.log('create')
             setMode('DEFAULT');
             window.location.reload();
         }}
@@ -882,10 +919,11 @@ export default function Event() {
             break;
         }
         }
-        point = point_topics.point;
+        point = points;
         content = <Update id={id} title={title} s_time={s_time} e_time={e_time} reward={reward} count={count} type={type} point={point} token={token}
         onUpdate={() => {
-            setMode('READ');
+            setMode('DEFAULT');
+            window.location.reload();
         }}></Update>
     }
 
@@ -910,42 +948,26 @@ export default function Event() {
     }
     if (pass_count>0) {
         pass_main = 
-                    <Nav topics={pass_topics} tier={tier} token={token} point={point_topics.point} type="pass" onChangeMode={(_id) => {
+                    <Nav topics={pass_topics} tier={tier} token={token} point={points} type="pass" onChangeMode={(_id) => {
                         setMode('READ');
                         setId(_id);
                     }}>
                     </Nav>
     }
 
-    const handelLogout = async () => {
-        try {
-          const res = await Axios.post('http://localhost:3000/api/member/logout', {
-            token:token,
-          });
-          Axios.post('http://localhost:8000/logCreate', { 
-            withCredentials: true ,
-            token:token,
-            type:res.data.type,
-            action:res.data.action
-          });
-          localStorage.setItem('token', null);
-        } catch (error) {
-            console.error('An error occurred during the request:', error);
-        }
-    };
-
     return (
         <div className="App">
         <header className="App-header">
-            <span>운영툴</span>
+            <span>...</span>
         </header>
         <div className="section-content">
             <div className="sidebar">
                 <Link href='/' onClick={handelLogout}>로그아웃</Link>
                 <br></br>
-                <Link href='/members'>01. 회원관리</Link>
+                <Link href='/member'>01. 회원관리</Link>
                 <Link href='/event'>02. 이벤트 관리</Link>
                 <Link href='/log'>03. 로그 확인</Link>
+                <Link href='/gamelog'>04. 게임 로그 확인</Link>
             </div>
             <section className="main-content">
             <div className="background">

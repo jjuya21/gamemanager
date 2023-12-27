@@ -1,8 +1,9 @@
 "use client";
 import "C:/Users/gc_de/next/my-app/src/style/globals.css";
-import React, {useState, useEffect,useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from "next/link";
 import Axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 function Nav(props) {
   const [checkedIds, setCheckedIds] = useState([]);
@@ -130,20 +131,39 @@ function Nav(props) {
 }
 
 export default function Members() {
+  const router = useRouter();
   let main = "";
   const [tier, setTier] = useState(null);
   const [topics,setTopics] = useState([]);
   const [token,setToken] = useState(null);
   
+  const handelLogout = async () => {
+    try {
+      const res = await Axios.post('http://localhost:3000/api/member/logout', {
+        token:token,
+      });
+      Axios.post('http://localhost:8000/logCreate', { 
+          withCredentials: true ,
+          token:token,
+          type:res.data.type,
+          action:res.data.action
+        });
+      localStorage.setItem('token', null);
+    } catch (error) {
+      router.replace('/');
+    }
+};
   useEffect(() => {
     const fetchData = async () => {
       try {
         setToken(localStorage.getItem('token'));
-        const res = await Axios.get('http://localhost:3000/api/member/memberRead');
+        const res = await Axios.get('http://localhost:3000/api/member/memberGet');
         setTopics(res.data.members);
         handleDashboard();
       } catch (error) {
-        console.error('An error occurred during the request:', error);
+        handelLogout();
+        router.replace('/');
+        alert("토큰의 유효시간이 지났습니다.")
       }
     };
     const handleDashboard = async () => {
@@ -154,29 +174,14 @@ export default function Members() {
           });
           setTier(res.data.tier);
         } catch (error) {
-          console.error('An error occurred during the request:', error);
+          handelLogout();
+          router.replace('/');
+          alert("토큰의 유효시간이 지났습니다.")
         }
       }
     };
     fetchData();
   }, [token]);
-
-  const handelLogout = async () => {
-      try {
-        const res = await Axios.post('http://localhost:3000/api/member/logout', {
-          token:token,
-        });
-        Axios.post('http://localhost:8000/logCreate', { 
-            withCredentials: true ,
-            token:token,
-            type:res.data.type,
-            action:res.data.action
-          });
-        localStorage.setItem('token', null);
-      } catch (error) {
-          console.error('An error occurred during the request:', error);
-      }
-  };
   
   if(topics){
     main = <Nav topics={topics} tier={tier} token={token}></Nav>
@@ -186,15 +191,16 @@ export default function Members() {
   return (
     <main className="App">
       <header className="App-header">
-        <span>운영툴</span>
+        <span>...</span>
       </header>
       <div className="section-content">
         <div className="sidebar">
           <Link href='/' onClick={handelLogout}>로그아웃</Link>
           <br></br>
-          <Link href='/members'>01. 회원관리</Link>
+          <Link href='/member'>01. 회원관리</Link>
           <Link href='/event'>02. 이벤트 관리</Link>
           <Link href='/log'>03. 로그 확인</Link>
+          <Link href='/gamelog'>04. 게임 로그 확인</Link>
         </div>
         <section className="main-content">
           <div className="background">

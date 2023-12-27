@@ -4,7 +4,7 @@ const getmembers = async (req, res) => {
 	
 	try {
 		// 데이터베이스 연결
-		const queryString = "SELECT id, name, memberID,password,phone,tier,DATE_FORMAT(joindate, '%Y.%m.%d %H:%i') as joindate,DATE_FORMAT(lastlogin, '%Y.%m.%d %H:%i') as lastlogin,DATE_FORMAT(lastlogout, '%Y.%m.%d %H:%i') as lastlogout from member_table";
+		const queryString = "SELECT id, name, memberID,password,phone,tier,DATE_FORMAT(joindate, '%Y.%m.%d %H:%i') as joindate,DATE_FORMAT(lastlogin, '%Y.%m.%d %H:%i') as lastlogin,DATE_FORMAT(lastlogout, '%Y.%m.%d %H:%i') as lastlogout from member_table ORDER BY tier";
 
 		// 'GET' 요청일 때 추가 작업 수행
 		const members = await new Promise((resolve, reject) => {
@@ -18,6 +18,7 @@ const getmembers = async (req, res) => {
 			});
 		});
 		// 'GET' 요청에 대한 응답
+		
 		res.json({ members: members });
 		// 연결 종료
 		
