@@ -125,9 +125,9 @@ export default function Log() {
     }, [type]);
 
     const handleInputChange = (event) => {
-            // 입력된 내용이 변경될 때마다 search 변수 업데이트
-            setSearch(event.target.value);
-        };
+      // 입력된 내용이 변경될 때마다 search 변수 업데이트
+      setSearch(event.target.value);
+    };
 
     const handleTypeChange = (event) => {
         setType(event.target.value);

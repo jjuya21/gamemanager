@@ -16,8 +16,10 @@ function Nav(props) {
     const tds = displayedTopics.map((t) => (
       <tr key={t.id}>
         <td style={{ width: 'auto', padding: '10px' }}>{t.time1}</td>
-        <td style={{ width: 'auto', padding: '10px' }}>{t.memberID}</td>
-        <td style={{ width: 'auto', padding: '10px', textAlign: 'left' }}>{t.action}</td>
+        <td style={{ width: 'auto', padding: '10px', textAlign: 'left' }}>{t.userID}</td>
+        <td style={{ width: 'auto', padding: '10px', textAlign: 'left' }}>{t.score}</td>
+        <td style={{ width: 'auto', padding: '10px', textAlign: 'left' }}>{t.playtime}초</td>
+        <td style={{ width: 'auto', padding: '10px', textAlign: 'left' }}>{(t.score / t.playtime).toFixed(2)}점</td>
       </tr>
     ));
   
@@ -31,12 +33,33 @@ function Nav(props) {
     return (
       <>
         <div>
+          <table>
+            <thead>
+              <tr>
+                <th style={{ width: 'auto', padding: '10px' }}>게임횟수</th>
+                <th style={{ width: 'auto', padding: '10px' }}>평균점수</th>
+                <th style={{ width: 'auto', padding: '10px' }}>평균플레이시간</th>
+                <th style={{ width: 'auto', padding: '10px' }}>평균초당점수</th>
+              </tr>
+            </thead>
+            <thead>
+              <tr>
+                <td>{props.gamedata.totalgame}</td>
+                <td>{(props.gamedata.averagescore).toFixed(1)}점</td>
+                <td>{(props.gamedata.averageplaytime).toFixed(0)}초</td> 
+                <td>{(props.gamedata.averagescore/props.gamedata.averageplaytime).toFixed(2)}점</td> 
+              </tr>
+            </thead>
+          </table>
+          <p></p>
           <table style={{clear: "both", display:"block"}}>
             <thead>
               <tr>
                 <th>시간</th>
-                <th>ID</th>
-                <th>내용</th>
+                <th>유저ID</th>
+                <th>점수</th>
+                <th>게임시간</th>
+                <th>초당점수</th>
               </tr>
             </thead>
             <tbody>{tds}</tbody>
@@ -84,8 +107,9 @@ export default function GameLog() {
     let contextControl = null;
     const [topics,setTopics] = useState([]);
     const [search, setSearch] = useState('');
-    const [type, setType] = useState('all');
-    
+    const [gamedata,setGamedata] = useState(null);
+    const [type, setType] = useState('time');
+
     const handelLogout = async () => {
       try {
         const res = await Axios.post('http://localhost:3000/api/member/logout', {
@@ -105,13 +129,14 @@ export default function GameLog() {
     const fetchData = async () => {
         try {
             setToken(localStorage.getItem('token'));
-            const res = await Axios.post('http://localhost:8000/logRead', 
+            const res = await Axios.post('http://localhost:8000/gamelogRead', 
             { 
                 withCredentials: true,
                 search:search,
                 type:type
             });
-            setTopics(res.data.logs);
+            setTopics(res.data.gamelogs);
+            setGamedata(res.data.gamedata)
             // 이곳에 다음 코드를 추가
         } catch (error) {
           handelLogout();
@@ -121,26 +146,26 @@ export default function GameLog() {
     };
     
     useEffect(() => {
-        fetchData()
+      fetchData()
     }, [type]);
 
     const handleInputChange = (event) => {
-            // 입력된 내용이 변경될 때마다 search 변수 업데이트
-            setSearch(event.target.value);
-        };
+      // 입력된 내용이 변경될 때마다 search 변수 업데이트
+      setSearch(event.target.value);
+    };
 
     const handleTypeChange = (event) => {
-        setType(event.target.value);
+      setType(event.target.value);
     };
 
     if(topics.length === 0){
         contextControl = <>
                 <select onChange={handleTypeChange}>
-                    <option value="all">전체</option>
-                    <option value="member">회원</option>
-                    <option value="event">이벤트</option>
-                    <option value="login">로그인</option>
-                    <option value="logout">로그아웃</option>
+                  <option value="time">시간</option>
+                  <option value="userID desc, time">유저ID</option>
+                  <option value="score">점수</option>
+                  <option value="playtime">게임시간</option>
+                  <option value="score/playtime">초당점수</option>
                 </select>
                 <input
                     type="text"
@@ -148,18 +173,18 @@ export default function GameLog() {
                     value={search}
                     onChange={handleInputChange}
                 />
-                <button onClick={fetchData}>검색</button>
+                <button onClick={fetchData}>유저검색</button>
                 <p></p>
                 <h2>기록이 없습니다.</h2>
             </>
     } else {
         contextControl = <>
             <select onChange={handleTypeChange}>
-                <option value="all">전체</option>
-                <option value="member">회원</option>
-                <option value="event">이벤트</option>
-                <option value="login">로그인</option>
-                <option value="logout">로그아웃</option>
+              <option value="time">시간</option>
+              <option value="userID desc, time">유저ID</option>
+              <option value="score">점수</option>
+              <option value="playtime">게임시간</option>
+              <option value="score/playtime">초당점수</option>
             </select>
             <input
                 type="text"
@@ -167,9 +192,9 @@ export default function GameLog() {
                 value={search}
                 onChange={handleInputChange}
             />
-            <button onClick={fetchData}>검색</button>
+            <button onClick={fetchData}>유저검색</button>
             <p></p>
-            <Nav topics={topics}></Nav>
+            <Nav topics={topics} gamedata={gamedata}></Nav>
         </>
     }
 

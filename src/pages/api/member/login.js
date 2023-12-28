@@ -24,7 +24,7 @@ const login = async (req, res) => {
     } else {
         if (result[0].password === password) {
           // JWT 토큰 생성
-          const token = jwt.sign({ memberID, tier: result[0].tier }, secretKey, { expiresIn: '1m' });
+          const token = jwt.sign({ memberID, tier: result[0].tier }, secretKey, { expiresIn: '1h' });
           // 데이터베이스 업데이트
           queryString = "UPDATE member_table SET lastlogin = now() WHERE memberID = ?";
           db.query(queryString, [memberID]);
